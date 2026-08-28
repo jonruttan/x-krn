@@ -48,14 +48,23 @@
   ; globally.  It worked, and one extra wrapper frame anywhere up the call
   ; chain made every definition vanish silently.
   ;
-  ; (base def-global) takes the global path unconditionally, so this no longer
-  ; depends on who called us or how deep they were -- x-lang#527.
+  ; eval! IS THE ANSWER, and it was there all along.  It evaluates with no env
+  ; save/restore, so a `def` inside it persists in the caller's world whatever
+  ; the frame depth -- no tail-position accident, no TCO dependency.  x-lang#527
+  ; reports there is "only one way" to write this and that plain eval/tail-eval
+  ; both break; eval! is a second way and it does not.
+  ;
+  ; This file used to call (prim-ref (lit base) (lit def-global)), a primitive
+  ; proposed on that issue and never shipped: engine v0.1.2 answers () for it,
+  ; so every $define! called nil, bound nothing, and 59 of 72 specs failed on
+  ; unbound symbols with no diagnostic pointing anywhere near here.
   ;
   ; BODY POSITION is a different problem and is NOT solved by it: an internal
   ; definition should bind LOCALLY, so it still goes through the
   ; construction-time rewrite in %krn-body-defs below.
 
-  (def %krn-def-global (prim-ref (lit base) (lit def-global)))
+  (def %krn-def-global
+    (fn (_ n v) (eval! (list (lit def) n v))))
   (def $define!
     (op (name-or-form . body)
       e

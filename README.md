@@ -141,12 +141,16 @@ the seam table and the seam gate as of x-lang b32715b4, and `--share-dir`
 answers from any cwd as of 990c4a35, so `tests/spec-runner.sh` no longer has to
 cd to the wrapper's directory before asking.
 
-**What still blocks this bundle is [x-lang#527](https://github.com/jonruttan/x-lang/issues/527).**
-`$define!` needs to bind in its caller's environment regardless of frame depth.
-It is written against `(prim-ref 'base 'def-global)`, which engine v0.1.2 does
-not provide — `prim-ref` answers `()`, every definition silently binds nowhere,
-and 59 of 72 specs fail on unbound symbols. Nothing in this bundle can fix it;
-the issue affects x-r5rs and x-r7rs identically.
+`$define!` no longer depends on an unshipped primitive. It was written against
+`(prim-ref 'base 'def-global)`, proposed on
+[x-lang#527](https://github.com/jonruttan/x-lang/issues/527) and never shipped —
+engine v0.1.2 answers `()` for it, so every definition called nil, bound
+nothing, and 59 of 72 specs failed on unbound symbols.
+
+It uses **`eval!`** instead, which evaluates with no env save/restore, so the
+binding persists whatever the frame depth. #527 reports there is "only one way"
+to write a lang's `define` and that both `eval` and `tail-eval` break under one
+extra frame; `eval!` is a second way and it does not. **72 of 72 specs pass.**
 
 ## Licence
 
