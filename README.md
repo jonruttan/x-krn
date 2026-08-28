@@ -14,9 +14,9 @@ Kernel 0.1.0
 (b c)
 ```
 
-This is a **personality**, not a dialect — it re-means shared spellings on
+This is a **lang**, not a dialect — it re-means shared spellings on
 purpose, which is exactly what x-lang's
-[personality contract](../../x-lang/docs/personality-contract.md) permits and
+[lang contract](../../x-lang/docs/lang-contract.md) permits and
 what makes it safe to ship separately from the platform.
 
 ## Status
@@ -36,30 +36,22 @@ The spec suite needs nothing but an `x` it can find:
 X=/path/to/x-lang/x.sh sh tests/spec-runner.sh
 ```
 
-Getting a **prompt** needs one more step today, and the reason is worth
-knowing. `x -l NAME` resolves `lib/NAME.x` then `apps/NAME/run.x`; there is no
-third step that searches a personality root, so a bundle living outside the
-platform tree cannot yet be named. Until that step exists, point the platform
-at this bundle:
+`-l` resolves an acquired bundle as of x-lang 7cfb28ed, so there is no symlink
+and no bridge:
 
 ```bash
-ln -s "$PWD" /path/to/x-lang/apps/krn
+x -l krn                 # interactive
+x -l krn -f program.krn  # batch
 ```
 
-then, **from the x-lang repo root** (`x.sh` detects a checkout by looking for
-`lib/x.x` under the cwd):
-
-```bash
-./x.sh -l krn                 # interactive
-./x.sh -l krn -f program.krn  # batch
-```
-
-The symlink is a bridge, not the design. Nothing in the test path uses it.
+The wrapper boots the dialect `lang.xon` declares, arms this bundle's root, cats
+`run.x`, and appends the launcher when no `-f` was given — which is why `run.x`
+knows no paths and does not boot the platform itself.
 
 ## Layout
 
 ```
-personality.xon        what this bundle is: name, dialect, release pairing
+lang.xon              what this bundle is: name, dialect, release pairing
 run.x                  THE entry -- the only file that may know a path
 krn/base.x             the language
 krn/printer.x          Kernel's own result writer
@@ -81,7 +73,7 @@ The 2024 tree was closer to alive than it looked. Deleting **one line** —
 "dies at load" to 68/72. The remaining four were four different problems:
 
 **`string?` was renamed.** The platform spells it `str?` now. Kernel keeps the
-Scheme name, which is what a personality is *for*; it sits with the `cons`/`car`
+Scheme name, which is what a lang is *for*; it sits with the `cons`/`car`
 aliases beside it.
 
 **Symbols print differently.** x's `write` is round-trippable, so `(list 'b 'c)`
@@ -144,10 +136,17 @@ built into `build/boot/`. `lib/x-base.x` is not a substitute — it is the sourc
 entry and opens with a root-relative `(include "lib/x-core.x")`.
 `tests/gen-harness.sh` probes both.
 
-And two seam-table gaps, both of which this bundle depends on:
-`%repl-print` (Kernel's printer) and `%repl-read` (which x-sweet will need)
-are live and documented as customizable in `lib/x/repl/loop.x`, but neither is
-in the contract's seam table — only their sibling `%repl-prompt` is.
+Both were reported and fixed upstream: `%repl-print` and `%repl-read` are in
+the seam table and the seam gate as of x-lang b32715b4, and `--share-dir`
+answers from any cwd as of 990c4a35, so `tests/spec-runner.sh` no longer has to
+cd to the wrapper's directory before asking.
+
+**What still blocks this bundle is [x-lang#527](https://github.com/jonruttan/x-lang/issues/527).**
+`$define!` needs to bind in its caller's environment regardless of frame depth.
+It is written against `(prim-ref 'base 'def-global)`, which engine v0.1.2 does
+not provide — `prim-ref` answers `()`, every definition silently binds nowhere,
+and 59 of 72 specs fail on unbound symbols. Nothing in this bundle can fix it;
+the issue affects x-r5rs and x-r7rs identically.
 
 ## Licence
 

@@ -1,4 +1,4 @@
-; personality.xon -- what this bundle IS.
+; lang.xon -- what this bundle IS.
 ;
 ; xon: read with the ordinary reader and never evaluated, like every other
 ; manifest in the x-lang world (pin.xon, engine.pin.xon).  A form a reader
@@ -7,12 +7,12 @@
 ; obeyed which half.
 ;
 ; FORMAT (one form per line):
-;   (personality "NAME")        the -l name
+;   (lang "NAME")               the -l name
 ;   (dialect NAME)              he | xe | rn -- a REQUIREMENT, not a taste
 ;   (requires-release "TAG")    the x-lang this bundle was built against
-;   (entry "FILE")              the one self-booting file
+;   (entry "FILE")              loaded AFTER the dialect, not instead of it
 
-(personality "krn")
+(lang "krn")
 
 ; HELIUM, and this is derived rather than preferred.  Kernel's imports are
 ; krn/base and krn/printer; neither reaches past x-core -- no float, no
@@ -25,9 +25,15 @@
 ; the part that is checkable, and it is compared for EQUALITY, never parsed
 ; -- the platform's existing rule for release strings.
 ;
-; 0.5.2 is what this bundle's 72 specs are green against.  Running it on
-; anything else should be a decision someone made, not something that
-; happened.
-(requires-release "0.5.2")
+; v0.5.2 -- WITH the v, because the stamp is compared for equality and the
+; platform writes what `git describe` gives it: a released install stamps the
+; tag itself ("v0.5.2"), a dev install stamps "v0.5.2-24-g7bb92f4c-dirty".
+; So this matches a RELEASE and reports "untested pairing" against a working
+; tree, which is the honest answer in both directions -- the earlier "0.5.2"
+; could never have matched anything.
+;
+; It is what this bundle's specs are green against.  Running it on anything
+; else should be a decision someone made, not something that happened.
+(requires-release "v0.5.2")
 
 (entry "run.x")
