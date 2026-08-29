@@ -61,7 +61,15 @@ jobs:
         run: |
           TAG="${{ steps.roll.outputs.tag }}"
           {
-            echo 'Acquire with x-lang'"'"'s `Pin bundle`. Put this in your `lang.pin.xon`:'
+            echo '## Install'
+            echo
+            echo '```sh'
+            echo "x --install-lang https://github.com/jonruttan/x-krn/releases/download/$TAG/lang.pin.xon"
+            echo '```'
+            echo
+            echo '## Or pin it, for a project'
+            echo
+            echo 'Put this in the project'"'"'s `lang.pin.xon`:'
             echo
             echo '```x'
             sed -n '/^  (lang /,$p' roll.out | sed 's/^  //'
@@ -71,4 +79,5 @@ jobs:
             --title "x-krn $TAG" \
             --notes-file notes.md \
             "dist/x-krn-$TAG.tar.gz" \
-            "dist/x-krn-$TAG.tar.gz.sha256"
+            "dist/x-krn-$TAG.tar.gz.sha256" \
+            "dist/lang.pin.xon"

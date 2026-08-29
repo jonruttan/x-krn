@@ -32,23 +32,25 @@ that carries the machinery.
 
 ## Install
 
-For everyday use — one copy on the machine, available everywhere:
+Nothing cloned, from any directory:
+
+```bash
+x --install-lang https://github.com/jonruttan/x-krn/releases/latest/download/lang.pin.xon
+x -l krn
+```
+
+x fetches the published pin, then the tarball it names, verifies the digest,
+and installs to `<share>/langs/krn` — where `x -l` looks. A failed upgrade
+leaves the working install untouched.
+
+From a clone, if you have one:
 
 ```bash
 make install                      # into the x on your PATH
-PREFIX=$HOME/.local make install  # or into a particular prefix
+PREFIX=$HOME/.local make install  # or a particular prefix
 ```
 
-That copies `lang.xon`, `run.x` and `krn/` into `<share>/langs/krn`, which is
-where `x -l` looks. Nothing else is needed:
-
-```bash
-$ cd anywhere && x -l krn
-Kernel 0.1.0
->>
-```
-
-`make uninstall` removes it again.
+`make uninstall` removes it either way.
 
 ## Pin it instead, for a project
 

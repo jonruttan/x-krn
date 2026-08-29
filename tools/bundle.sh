@@ -49,13 +49,26 @@ fi
 printf '%s  %s\n' "$DG" "$NAME.tar.gz" > "$OUT/$NAME.tar.gz.sha256"
 
 DECLARED=$(sed -n 's/^(lang "\(.*\)")$/\1/p' lang.xon)
+URL="https://github.com/jonruttan/x-krn/releases/download/$TAG/$NAME.tar.gz"
+
+# THE PIN IS AN ARTIFACT, not just something printed for a human to retype.
+# `x --install-lang <url>` fetches exactly this file, reads the digest and the
+# tarball URL out of it, and installs -- so publishing it beside the tarball is
+# what makes a release installable without cloning anything.
+{
+	printf '(lang "%s")\n' "$DECLARED"
+	printf '(release "%s")\n' "$TAG"
+	printf '(bundle "sha256:%s" "%s")\n' "$DG" "$URL"
+	printf '(source "https://github.com/jonruttan/x-krn.git")\n'
+} > "$OUT/lang.pin.xon"
 
 echo "bundle: $OUT/$NAME.tar.gz"
+echo "bundle: $OUT/lang.pin.xon"
 echo "bundle: $DG"
 echo
-echo "The consumer's lang.pin.xon:"
+echo "Install it with:"
+echo "  x --install-lang https://github.com/jonruttan/x-krn/releases/download/$TAG/lang.pin.xon"
 echo
-echo "  (lang \"$DECLARED\")"
-echo "  (release \"$TAG\")"
-echo "  (bundle \"sha256:$DG\" \"https://github.com/jonruttan/x-krn/releases/download/$TAG/$NAME.tar.gz\")"
-echo "  (source \"https://github.com/jonruttan/x-krn.git\")"
+echo "Or pin it, by putting $OUT/lang.pin.xon in your project:"
+echo
+sed 's/^/  /' "$OUT/lang.pin.xon"
