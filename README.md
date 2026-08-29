@@ -22,13 +22,10 @@ printer, not x-lang's `('b 'c)`. The terms are in x-lang's
 
 ## Status
 
-**Early.** 72 specs, all green.
-
-It runs on x-lang `main` and **not on any released x-lang**: bundle
-acquisition, `-l` loading and `--share-dir` all landed after `v0.5.2`, which is
-still the latest tag. `lang.xon` therefore declares no `(requires-release …)`
-and CI tests against `main` only. Both get pinned to a tag once x-lang cuts one
-that carries the machinery.
+**Early.** 74 specs, all green against x-lang **v0.6.0** — the first release
+carrying bundle acquisition, `-l` loading and `--share-dir`. CI runs the
+declared release and `main`, so a platform that moves underneath this bundle
+shows up as a red build rather than a surprise years later.
 
 ## Install
 

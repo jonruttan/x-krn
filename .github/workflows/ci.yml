@@ -31,17 +31,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # MAIN ONLY, FOR NOW, and the reason is worth recording: no RELEASED
-        # x-lang can run this bundle.  Pin bundle, `-l` bundle loading,
-        # --share-dir and eval!-in-the-seam all landed after v0.5.2, which is
-        # still the latest tag.  A pinned leg would check out a platform that
-        # answers "Unknown option: --share-dir" -- which it did, on this
-        # repository's first CI run.
-        #
-        # When x-lang cuts a release carrying that machinery, add it here and
-        # put the same string in lang.xon's (requires-release ...).  They are
-        # one fact and must not drift.
-        x-lang: ['main']
+        # BOTH LEGS, AND THEY ANSWER DIFFERENT QUESTIONS.  The pinned leg
+        # proves this bundle still runs on the platform it DECLARES; the main
+        # leg is an early warning that x-lang has moved underneath it, and is
+        # allowed to fail.  Keep the pinned row equal to lang.xon's
+        # (requires-release ...) VERBATIM -- they are one fact, and the check
+        # below fails the build if they drift.
+        x-lang: ['v0.6.0', 'main']
 
     steps:
       - uses: actions/checkout@v4
@@ -53,6 +49,19 @@ jobs:
           ref: ${{ matrix.x-lang }}
           path: .x-lang
 
+
+      # The bundle declares a release; CI proves the declaration is not
+      # decoration.  A drifted pin is a loud failure on the pinned leg, never
+      # a silently-green build against a platform nobody checked.
+      - name: Check the declared release against the checkout
+        if: matrix.x-lang != 'main'
+        run: |
+          declared=$(sed -n 's/^(requires-release "\(.*\)")$/\1/p' lang.xon)
+          if [ "$declared" != "${{ matrix.x-lang }}" ]; then
+            echo "lang.xon declares $declared, matrix leg is ${{ matrix.x-lang }}" >&2
+            echo "update one or the other -- they are the same fact" >&2
+            exit 1
+          fi
 
       # The engine is acquired, not built: x-lang pins one and knows how to
       # fetch it.  Nothing here reimplements that.
