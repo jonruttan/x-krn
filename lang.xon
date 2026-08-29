@@ -27,12 +27,13 @@
 ; that is checkable, and it is compared for EQUALITY, never parsed -- the
 ; platform's own rule for release strings.
 ;
-; v0.6.0 is the first release carrying what this bundle needs: bundle
+; v0.6.0 was the first release carrying what this bundle needs: bundle
 ; acquisition, `-l` loading, --share-dir, and eval! in the seam.  Everything
-; before it answers "Unknown option: --share-dir".  It is also what this
-; bundle's specs are green against; running on anything else should be a
-; decision someone made, not something that happened.
+; before it answers "Unknown option: --share-dir".  v0.7.0 is what this
+; bundle's specs are green against now, and the row tracks that rather than the
+; floor; running on anything else should be a decision someone made, not
+; something that happened.
 
-(requires-release "v0.6.0")
+(requires-release "v0.7.0")
 
 (entry "run.x")
