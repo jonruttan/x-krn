@@ -63,8 +63,15 @@
   ; definition should bind LOCALLY, so it still goes through the
   ; construction-time rewrite in %krn-body-defs below.
 
+  ; THE VALUE IS QUOTED, and leaving it bare hides for a long time.
+  ; (list (lit def) n v) builds (def name <value>) and eval! then EVALUATES
+  ; it, so the value is evaluated a SECOND time.  Numbers, strings and
+  ; procedures self-evaluate and nothing looks wrong; a symbol value gets
+  ; looked up, so ($define! s (quote foo)) died with Unbound SYMBOL 'foo.
+  ; The suite did not cover a symbol-valued definition, so it was green and
+  ; wrong; 05-predicates.spec.md now covers it.
   (def %krn-def-global
-    (fn (_ n v) (eval! (list (lit def) n v))))
+    (fn (_ n v) (eval! (list (lit def) n (list (lit lit) v)))))
   (def $define!
     (op (name-or-form . body)
       e

@@ -32,8 +32,29 @@ that carries the machinery.
 
 ## Install
 
-Acquire it with x-lang's `Pin bundle`, which fetches the release tarball and
-verifies it against the digest before unpacking. In your project's
+For everyday use — one copy on the machine, available everywhere:
+
+```bash
+make install                      # into the x on your PATH
+PREFIX=$HOME/.local make install  # or into a particular prefix
+```
+
+That copies `lang.xon`, `run.x` and `krn/` into `<share>/langs/krn`, which is
+where `x -l` looks. Nothing else is needed:
+
+```bash
+$ cd anywhere && x -l krn
+Kernel 0.1.0
+>>
+```
+
+`make uninstall` removes it again.
+
+## Pin it instead, for a project
+
+An install is unversioned and machine-wide. When it matters *which* version a
+project builds against, pin it: `Pin bundle` fetches the release tarball and
+verifies it against a digest before unpacking. In the project's
 `lang.pin.xon`:
 
 ```x
@@ -52,10 +73,12 @@ ready to paste. Then:
 "deps/langs/krn-v0.1.0"
 ```
 
-`Pin bundle` takes the destination as an argument, so it can go anywhere.
-`deps/langs/` is where `x -l` looks in a checkout — beside the engine and
-anything else fetched rather than built. An installed x looks in
-`share/x/langs/` instead. `X_LANG_DIR` overrides both.
+`deps/langs/` is where `x -l` looks in a checkout, beside the engine and
+anything else fetched rather than built. `X_LANG_DIR` overrides it.
+
+**Which to use.** Install when you just want `x -l krn` to work. Pin when a
+build depends on it — the digest is what makes the version reproducible, and
+an install has none.
 
 ## Running it
 
@@ -93,6 +116,7 @@ tests/spec-runner.sh   sources the platform's shared runner
 tests/gen-harness.sh   writes tests/lib/harness.gen.x (generated, never committed)
 tests/specs/*.spec.md  the suite
 tools/bundle.sh        rolls a release tarball and prints its pin
+Makefile               install / uninstall / test / bundle
 ```
 
 No file here carries a path literal, `run.x` included — the bundle relocates,

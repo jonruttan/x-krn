@@ -164,3 +164,23 @@
 ---
     7
 
+
+## $define! with a symbol value
+
+### binds a symbol without evaluating it
+
+```scheme
+($define! sym (quote foo))
+sym
+```
+---
+    foo
+
+### binds a list of symbols
+
+```scheme
+($define! syms (list (quote a) (quote b)))
+syms
+```
+---
+    (a b)
