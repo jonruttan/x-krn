@@ -48,9 +48,14 @@ ready to paste. Then:
 
 ```x-repl
 > (import x/tool/pin)
-> (Pin bundle "langs")
-"langs/krn-v0.1.0"
+> (Pin bundle "deps/langs")
+"deps/langs/krn-v0.1.0"
 ```
+
+`Pin bundle` takes the destination as an argument, so it can go anywhere.
+`deps/langs/` is where `x -l` looks in a checkout — beside the engine and
+anything else fetched rather than built. An installed x looks in
+`share/x/langs/` instead. `X_LANG_DIR` overrides both.
 
 ## Running it
 
