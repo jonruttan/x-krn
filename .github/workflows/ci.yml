@@ -31,12 +31,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Keep the pinned row equal to lang.xon's (requires-release) VERBATIM.
-        # It is the full tag now ("v0.5.2"): the platform stamps what git
-        # describe gives it and compares for equality without parsing, so
-        # reconstructing a tag here from a bare version was one more place for
-        # the two to drift.
-        x-lang: ['v0.5.2', 'main']
+        # MAIN ONLY, FOR NOW, and the reason is worth recording: no RELEASED
+        # x-lang can run this bundle.  Pin bundle, `-l` bundle loading,
+        # --share-dir and eval!-in-the-seam all landed after v0.5.2, which is
+        # still the latest tag.  A pinned leg would check out a platform that
+        # answers "Unknown option: --share-dir" -- which it did, on this
+        # repository's first CI run.
+        #
+        # When x-lang cuts a release carrying that machinery, add it here and
+        # put the same string in lang.xon's (requires-release ...).  They are
+        # one fact and must not drift.
+        x-lang: ['main']
 
     steps:
       - uses: actions/checkout@v4
@@ -48,25 +53,14 @@ jobs:
           ref: ${{ matrix.x-lang }}
           path: .x-lang
 
-      # The bundle declares a release; CI proves the declaration is not
-      # decoration.  A drifted pin is a loud failure on the pinned leg, never
-      # a silently-green build against a platform nobody checked.
-      - name: Check the declared release against the checkout
-        if: matrix.x-lang != 'main'
-        run: |
-          declared=$(sed -n 's/^(requires-release "\(.*\)")$/\1/p' lang.xon)
-          if [ "$declared" != "${{ matrix.x-lang }}" ]; then
-            echo "lang.xon declares $declared, matrix leg is ${{ matrix.x-lang }}" >&2
-            echo "update one or the other -- they are the same fact" >&2
-            exit 1
-          fi
 
       # The engine is acquired, not built: x-lang pins one and knows how to
       # fetch it.  Nothing here reimplements that.
       - name: Build the platform
         working-directory: .x-lang
         run: |
-          make engine
+          make engine      # acquire the pinned engine
+          make             # x-bin at the repo root -- `make engine` does not build it
           make boot        # the launcher-free amalgams the harness loads
 
       - name: Run the Kernel specs

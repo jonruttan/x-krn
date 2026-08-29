@@ -20,20 +20,16 @@
 ; every user a numeric tower they never call.
 (dialect he)
 
-; PAIRING, NOT PINNING.  A digest freezes bytes; it says nothing about
-; whether those bytes still run against a platform that moved.  This row is
-; the part that is checkable, and it is compared for EQUALITY, never parsed
-; -- the platform's existing rule for release strings.
+; NO PAIRING ROW YET, and the absence is deliberate rather than an oversight.
+; This row names the x-lang release a bundle was built against, compared for
+; EQUALITY and never parsed.  No released x-lang can run this bundle: bundle
+; acquisition, `-l` loading, --share-dir and eval!-in-the-seam all landed after
+; v0.5.2, which is still the latest tag.  Declaring v0.5.2 would name a
+; platform that answers "Unknown option: --share-dir"; declaring a tag that
+; does not exist would be a promise, not a fact.
 ;
-; v0.5.2 -- WITH the v, because the stamp is compared for equality and the
-; platform writes what `git describe` gives it: a released install stamps the
-; tag itself ("v0.5.2"), a dev install stamps "v0.5.2-24-g7bb92f4c-dirty".
-; So this matches a RELEASE and reports "untested pairing" against a working
-; tree, which is the honest answer in both directions -- the earlier "0.5.2"
-; could never have matched anything.
-;
-; It is what this bundle's specs are green against.  Running it on anything
-; else should be a decision someone made, not something that happened.
-(requires-release "v0.5.2")
+; So it says nothing, Pin bundle reports "platform pairing unchecked", and that
+; is the honest state.  Add the row -- and the same string to the CI matrix,
+; they are one fact -- when x-lang cuts a release carrying the machinery.
 
 (entry "run.x")
