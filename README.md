@@ -22,7 +22,7 @@ printer, not x-lang's `('b 'c)`. The terms are in x-lang's
 
 ## Status
 
-**Early.** 74 specs, all green against x-lang **v0.8.0** — the first release
+**Early.** 74 specs, all green against x-lang **v0.8.1** — the first release
 carrying bundle acquisition, `-l` loading and `--share-dir`. CI runs the
 declared release and `main`, so a platform that moves underneath this bundle
 shows up as a red build rather than a surprise years later.
