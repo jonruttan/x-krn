@@ -22,10 +22,13 @@ printer, not x-lang's `('b 'c)`. The terms are in x-lang's
 
 ## Status
 
-**Early.** 74 specs, all green against x-lang **v0.8.1** — the first release
-carrying bundle acquisition, `-l` loading and `--share-dir`. CI runs the
-declared release and `main`, so a platform that moves underneath this bundle
-shows up as a red build rather than a surprise years later.
+**Early.** 74 specs, all green against x-lang **v0.8.1**.
+
+That row is a *pairing*, not a floor. It records what this bundle was last
+built and tested against, not the oldest platform that would still run it —
+`lang.xon` carries the floor and the reasoning beside it. CI runs the declared
+release *and* `main`, so a platform that moves underneath this bundle shows up
+as a red build rather than a surprise years later.
 
 ## Install
 
@@ -49,6 +52,27 @@ PREFIX=$HOME/.local make install  # or a particular prefix
 
 `make uninstall` removes it either way.
 
+**One trap, and it is the one you will hit.** `x` decides where to look for
+langs from the directory you run it *in*. Inside an **x-lang checkout** it
+searches `deps/langs/` and an installed lang is invisible, however correctly it
+was installed:
+
+```
+$ cd path/to/x-lang && x -l krn
+Error: no library, app or lang named 'krn'
+  searched lib/krn.x, apps/krn/run.x
+      and deps/langs/*/lang.xon
+```
+
+Run it from anywhere else, or name the bundles explicitly — `X_LANG_DIR` wins
+in both modes:
+
+```bash
+X_LANG_DIR=$HOME/.local/share/x/langs/ x -l krn   # the installed one
+X_LANG_DIR=/path/to/x-krn/.. x -l krn             # a checkout, uninstalled
+```
+
+
 ## Pin it instead, for a project
 
 An install is unversioned and machine-wide. When it matters *which* version a
@@ -58,8 +82,8 @@ verifies it against a digest before unpacking. In the project's
 
 ```x
 (lang "krn")
-(release "v0.1.0")
-(bundle "sha256:…" "https://github.com/jonruttan/x-krn/releases/download/v0.1.0/x-krn-v0.1.0.tar.gz")
+(release "v0.1.2")
+(bundle "sha256:…" "https://github.com/jonruttan/x-krn/releases/download/v0.1.2/x-krn-v0.1.2.tar.gz")
 (source "https://github.com/jonruttan/x-krn.git")
 ```
 
@@ -69,7 +93,7 @@ ready to paste. Then:
 ```x-repl
 > (import x/tool/pin)
 > (Pin bundle "deps/langs")
-"deps/langs/krn-v0.1.0"
+"deps/langs/krn-v0.1.2"
 ```
 
 `deps/langs/` is where `x -l` looks in a checkout, beside the engine and
@@ -129,10 +153,20 @@ Run the specs against any x-lang checkout or install:
 X=/path/to/x-lang/x.sh sh tests/spec-runner.sh
 ```
 
+**Pass `X` explicitly.** Without it the suite takes the `x` on your PATH, and an
+installed x that trails the checkout reports failures the platform has already
+fixed.
+
+**Do not `make install` into an x-lang checkout.** The Makefile asks
+`$(X) --share-dir` where to put the bundle, and a checkout answers with its own
+root — so the files land in `<checkout>/langs/krn`, which is not one of the
+three paths `-l` searches there. It reports success and the lang stays
+invisible. Install into a real `<share>` tree, or use `X_LANG_DIR`.
+
 Roll a release tarball locally, with the digest a consumer would pin:
 
 ```bash
-sh tools/bundle.sh v0.1.0
+sh tools/bundle.sh v0.1.2
 ```
 
 The tarball is byte-reproducible: it is built from the tag with `git archive`
