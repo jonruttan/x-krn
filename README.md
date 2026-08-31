@@ -16,8 +16,9 @@ Kernel 0.1.0
 ```
 
 x-krn is a **lang**: a different surface language loaded over an x-lang
-dialect, free to re-mean shared spellings. `(b c)` above is Kernel's own
-printer, not x-lang's `('b 'c)`. The terms are in x-lang's
+dialect. Where x-lang and Kernel spell something the same way, Kernel is free
+to mean something different by it: `(b c)` above is Kernel's own printer, not
+x-lang's `('b 'c)`. The terms are in x-lang's
 [lang contract](https://github.com/jonruttan/x-lang/blob/main/docs/lang-contract.md).
 
 ## Status
