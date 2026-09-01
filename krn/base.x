@@ -82,11 +82,10 @@
   ; (define f (lambda (p) p)) ALL bind nothing.
   ;
   ; (base def-global) takes `def`'s top-level path unconditionally and is
-  ; frame-independent.  It SHIPPED in engine v0.1.5 (x-lang pins it from
-  ; v0.9.0); this bundle's pinned platform is v0.8.1 -> engine v0.1.4, so the
-  ; eval! fallback is the LIVE path here until the pin moves.  Prefer-when-
-  ; present is correct on either engine: correct at the prompt on any, correct
-  ; under frames on one that carries it.
+  ; frame-independent.  It SHIPPED in engine v0.1.5, and this bundle's pinned
+  ; platform (x-lang v0.9.0 -> engine v0.1.6) carries it, so the primitive is
+  ; the LIVE path here; eval! remains the fallback for an older engine --
+  ; correct at the prompt on any, correct under frames on one that carries it.
   ;
   ; THE FALLBACK IS EXPLICIT ON PURPOSE.  prim-ref answers () for a member
   ; that is not there, so calling the result blind binds nothing and reports
