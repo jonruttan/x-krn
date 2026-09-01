@@ -176,6 +176,22 @@ and a timestamp-free gzip, so two people rolling one tag get one digest.
 Pushing a `v*` tag runs the suite and, only if it is green, publishes the
 tarball and its `.sha256` as a GitHub release.
 
+## Background
+
+Kernel is John N. Shutt's language, worked out in his WPI dissertation and
+specified in the R-1RK report. Its claim is that the fexpr — Lisp's oldest and
+most disreputable idea, dropped from mainstream Lisps in the 1980s for being
+impossible to reason about — becomes sound once environments are first-class
+values. So the *operative* is the primitive: `$vau` receives its operands
+unevaluated together with its caller's environment, and ordinary applicative
+functions are derived from operatives by `wrap` rather than the other way
+around. Shutt died in 2021 with the design still unfinished; the R-1RK remains
+the reference, and this bundle implements a small core of it.
+
+- [The Kernel Programming Language](https://web.cs.wpi.edu/~jshutt/kernel.html) — Shutt's page, with the reports
+- [R-1RK](https://ftp.cs.wpi.edu/pub/techreports/pdf/05-07.pdf) — the *Revised⁻¹ Report on the Kernel Programming Language*
+- [Fexpr](https://en.wikipedia.org/wiki/Fexpr) on Wikipedia — the idea's history, and where Kernel sits in it
+
 ## Licence
 
 MIT No Attribution (MIT-0). See [LICENSE](LICENSE).
