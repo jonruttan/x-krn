@@ -54,10 +54,11 @@
   ; reports there is "only one way" to write this and that plain eval/tail-eval
   ; both break; eval! is a second way and it does not.
   ;
-  ; This file used to call (prim-ref (lit base) (lit def-global)), a primitive
-  ; proposed on that issue and never shipped: engine v0.1.2 answers () for it,
-  ; so every $define! called nil, bound nothing, and 59 of 72 specs failed on
-  ; unbound symbols with no diagnostic pointing anywhere near here.
+  ; This file once called (prim-ref (lit base) (lit def-global)) BEFORE the
+  ; primitive existed -- proposed on that issue, absent through engine v0.1.4.
+  ; An engine that lacks it answers () for the prim-ref, so every $define!
+  ; called nil, bound nothing, and 59 of 72 specs failed on unbound symbols
+  ; with no diagnostic pointing anywhere near here.
   ;
   ; BODY POSITION is a different problem and is NOT solved by it: an internal
   ; definition should bind LOCALLY, so it still goes through the
@@ -81,9 +82,11 @@
   ; (define f (lambda (p) p)) ALL bind nothing.
   ;
   ; (base def-global) takes `def`'s top-level path unconditionally and is
-  ; frame-independent.  It is not in engine v0.1.2, so this prefers it when
-  ; present and falls back to eval! when not -- correct at the prompt on any
-  ; engine, correct under frames on one that carries it.
+  ; frame-independent.  It SHIPPED in engine v0.1.5 (x-lang pins it from
+  ; v0.9.0); this bundle's pinned platform is v0.8.1 -> engine v0.1.4, so the
+  ; eval! fallback is the LIVE path here until the pin moves.  Prefer-when-
+  ; present is correct on either engine: correct at the prompt on any, correct
+  ; under frames on one that carries it.
   ;
   ; THE FALLBACK IS EXPLICIT ON PURPOSE.  prim-ref answers () for a member
   ; that is not there, so calling the result blind binds nothing and reports
