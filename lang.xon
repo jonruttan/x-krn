@@ -34,6 +34,6 @@
 ; floor; running on anything else should be a decision someone made, not
 ; something that happened.
 
-(requires-release "v0.8.1")
+(requires-release "v0.9.0")
 
 (entry "run.x")

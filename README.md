@@ -23,7 +23,7 @@ x-lang's `('b 'c)`. The terms are in x-lang's
 
 ## Status
 
-**Early.** 74 specs, all green against x-lang **v0.8.1**.
+**Early.** 74 specs, all green against x-lang **v0.9.0**.
 
 That row is a *pairing*, not a floor. It records what this bundle was last
 built and tested against, not the oldest platform that would still run it —
