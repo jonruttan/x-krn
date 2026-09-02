@@ -1,5 +1,7 @@
 # x-krn — Kernel on x-lang
 
+<p align="center"><img src="docs/bitwise-banner.svg" alt="x-krn, with Bitwise the owl" width="100%"></p>
+
 A [Kernel](https://web.cs.wpi.edu/~jshutt/kernel.html) surface language riding
 on [x-lang](https://github.com/jonruttan/x-lang). Operatives (`$vau`) are
 first-class; applicatives derive from them via `wrap`. Same s-expressions as
@@ -195,3 +197,5 @@ the reference, and this bundle implements a small core of it.
 ## Licence
 
 MIT No Attribution (MIT-0). See [LICENSE](LICENSE).
+
+<p align="center"><img src="docs/bitwise-mark.svg" alt="Bitwise" width="96"></p>
