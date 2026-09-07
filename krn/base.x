@@ -235,17 +235,23 @@
   ($define!
     (append a b)
     ($if (null? a) b (pair (first a) (append (rest a) b))))
+  ; $letrec, not an inner $define!: the helper is recursive, and a $define!
+  ; in a body used to reach the global environment by an engine bug that
+  ; x-lang v0.12.0 fixed (a def scopes by its live frame now).  The body then
+  ; bound rev-helper where nothing could see it, and reverse answered
+  ; "Unbound SYMBOL 'rev-helper" -- $letrec is what this bundle already ships
+  ; for a binding that must see itself.
   ($define!
     (reverse lst)
-    ($define!
-      rev-helper
-      ($lambda
-        (l acc)
-        ($if
-          (null? l)
-          acc
-          (rev-helper (rest l) (pair (first l) acc)))))
-    (rev-helper lst ()))
+    ($letrec
+      ((rev-helper
+         ($lambda
+           (l acc)
+           ($if
+             (null? l)
+             acc
+             (rev-helper (rest l) (pair (first l) acc))))))
+      (rev-helper lst ())))
   ($define!
     (list-ref lst n)
     ($if (= n 0) (first lst) (list-ref (rest lst) (- n 1))))
