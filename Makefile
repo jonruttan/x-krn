@@ -47,6 +47,8 @@ install: ## Install into <share>/langs/krn
 	cp -R $(PAYLOAD) "$(DEST)/"
 	printf '%s\n' '$(LANG_VERSION)' > "$(DEST)/version"
 	@echo "x-krn: installed to $(DEST)"
+	@echo "x-krn: writing the boot image"
+	"$(X)" --image -l krn || true
 	@echo "x-krn: try  x -l krn"
 
 .PHONY: uninstall
