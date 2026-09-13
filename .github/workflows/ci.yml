@@ -72,6 +72,15 @@ jobs:
           make             # x-bin at the repo root -- `make engine` does not build it
           make boot        # the launcher-free amalgams the harness loads
 
+      # The bundle's own sources, through the platform's linter -- the sweep
+      # a lang under languages/ used to fall outside of entirely.  It SKIPS
+      # itself on an x whose linter cannot read krn/constructs.x, which is
+      # every released x up to and including v0.14.0; tests/lint.sh says why.
+      # So the pinned leg is quiet until its pin moves, and the main leg
+      # gates from the day the platform fix lands.
+      - name: Lint the bundle
+        run: X="$PWD/.x-lang/x.sh" sh tests/lint.sh
+
       - name: Run the Kernel specs
         run: X="$PWD/.x-lang/x.sh" sh tests/spec-runner.sh
 
