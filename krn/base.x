@@ -1,4 +1,4 @@
-; # x-krn -- the Kernel personality for x-lang
+; # x-krn -- the Kernel lang for x-lang
 ;
 ; ## krn/base.x -- the language
 ;
@@ -35,61 +35,23 @@
   (def cdr rest)
   (def quote lit)
   (def $cond match)
-  ; string? was a bare global in 2024; the platform's spelling is str?
-  ; (x/type/str).  Kernel keeps the Scheme name, which is the whole point of
-  ; a personality -- see the aliases above it, which do the same for cons/car.
+  ; Kernel keeps the Scheme name `string?`; the platform's spelling is str?,
+  ; the same re-naming as the cons/car aliases above.
 
   (def string? str?)
   ; --- $define! ---
 
-  ; TOP LEVEL.  This used to put its eval in TAIL position on purpose: x's
-  ; `def` decides global-versus-local by save-stack depth, and TCO has popped
-  ; this op's frame by the time a tail eval runs, so the binding landed
-  ; globally.  It worked, and one extra wrapper frame anywhere up the call
-  ; chain made every definition vanish silently.
-  ;
-  ; eval! IS THE ANSWER, and it was there all along.  It evaluates with no env
-  ; save/restore, so a `def` inside it persists in the caller's world whatever
-  ; the frame depth -- no tail-position accident, no TCO dependency.  x-lang#527
-  ; reports there is "only one way" to write this and that plain eval/tail-eval
-  ; both break; eval! is a second way and it does not.
-  ;
-  ; This file once called (prim-ref (lit base) (lit def-global)) BEFORE the
-  ; primitive existed -- proposed on that issue, absent through engine v0.1.4.
-  ; An engine that lacks it answers () for the prim-ref, so every $define!
-  ; called nil, bound nothing, and 59 of 72 specs failed on unbound symbols
-  ; with no diagnostic pointing anywhere near here.
-  ;
-  ; BODY POSITION is a different problem and is NOT solved by it: an internal
-  ; definition should bind LOCALLY, so it still goes through the
-  ; construction-time rewrite in %krn-body-defs below.
+  ; $define! binds in its caller's environment. A definition in body position
+  ; binds locally instead, through the construction-time rewrite in
+  ; %krn-body-defs below rather than by evaluating an inner $define! at run
+  ; time.
 
-  ; THE VALUE IS QUOTED, and leaving it bare hides for a long time.
-  ; (list (lit def) n v) builds (def name <value>) and eval! then EVALUATES
-  ; it, so the value is evaluated a SECOND time.  Numbers, strings and
-  ; procedures self-evaluate and nothing looks wrong; a symbol value gets
-  ; looked up, so ($define! s (quote foo)) died with Unbound SYMBOL 'foo.
-  ; The suite did not cover a symbol-valued definition, so it was green and
-  ; wrong; 05-predicates.spec.md now covers it.
-  ; TWO MECHANISMS, BECAUSE ONE OF THEM IS NOT ENOUGH ON ITS OWN.
-  ;
-  ; eval! evaluates with no env save/restore, so a `def` inside it lands in
-  ; whatever env is CURRENT.  At top level that is global and everything works.
-  ; It is not frame-independent: interpose one operative frame -- which
-  ; shadowing any late-bound name does, R7RS `guard` being the live case --
-  ; and the binding lands in that frame and is discarded with it.  Measured:
-  ; with a bare passthrough guard loaded, (define v 42), (define (f p) p) and
-  ; (define f (lambda (p) p)) ALL bind nothing.
-  ;
-  ; (base def-global) takes `def`'s top-level path unconditionally and is
-  ; frame-independent.  It SHIPPED in engine v0.1.5, and this bundle's pinned
-  ; platform (x-lang v0.9.0 -> engine v0.1.6) carries it, so the primitive is
-  ; the LIVE path here; eval! remains the fallback for an older engine --
-  ; correct at the prompt on any, correct under frames on one that carries it.
-  ;
-  ; THE FALLBACK IS EXPLICIT ON PURPOSE.  prim-ref answers () for a member
-  ; that is not there, so calling the result blind binds nothing and reports
-  ; nothing; that cost two long hunts already.  See x-lang#527.
+  ; Top-level binding uses (base def-global), which takes def's global path
+  ; unconditionally and is frame-independent; where the engine lacks it
+  ; (prim-ref answers ()), the fallback is eval! of (def name (lit value)). The
+  ; (lit ...) wrap matters: eval! evaluates the def form it is handed, which
+  ; would evaluate the value a second time -- invisible for self-evaluating
+  ; values, but a symbol value would be looked up. See x-lang#527.
   (def %dg-prim (prim-ref (lit base) (lit def-global)))
   (def %krn-def-global
     (if (null? %dg-prim)
@@ -114,24 +76,14 @@
   (def #inert ())
   ; --- Internal definitions ---
 
-  ; ($define! (f x) ($define! y (+ x 1)) (* x y)) must give (f 3) => 12.
-  ;
-  ; It cannot work by evaluating the inner $define! at run time.  $define! is
-  ; an operative, so its `def` runs inside $define!'s OWN frame; in body
-  ; position that frame is not in tail position, so the binding is created and
-  ; then discarded with the frame.  The name is unbound everywhere afterwards
-  ; -- not shadowed, not global, gone.  Passing `e` to eval does not help:
-  ; `def` under an explicit-env eval binds somewhere the caller cannot see.
-  ;
-  ; So the rewrite happens at CONSTRUCTION time instead, which is also how
-  ; Schemes handle internal defines (the letrec* conversion): a $define! in
-  ; body position becomes a literal `def`, which x binds in the body's own
-  ; frame, visible to the forms after it.  Verified: a bare `def` between two
-  ; body forms is seen by the second.
-  ;
-  ; One level deep, deliberately -- exactly the forms that ARE the body.  A
-  ; $define! nested inside an $if inside a body is not a definition context in
-  ; Kernel either.
+  ; ($define! (f x) ($define! y (+ x 1)) (* x y)) gives (f 3) => 12. An
+  ; internal $define! cannot bind by evaluating at run time -- $define! is an
+  ; operative, so its `def` runs in $define!'s own frame and the binding is
+  ; discarded with it. So a $define! in body position is rewritten at
+  ; construction time into a literal `def`, which x binds in the body's own
+  ; frame, visible to the forms after it -- the letrec* conversion Schemes use.
+  ; One level deep: a $define! nested inside an $if is not a definition context
+  ; in Kernel either.
 
   (def %krn-def-form
     (fn (_ form)
@@ -226,7 +178,7 @@
   ; append, filter and reverse are no longer bare globals in ANY x-lang
   ; dialect (they live on the List class), so there is nothing to alias even
   ; if we wanted to.  Defining them here is the honest arrangement anyway --
-  ; a personality that borrowed the platform's list vocabulary would be
+  ; a lang that borrowed the platform's list vocabulary would be
   ; borrowing its argument conventions with it.
 
   ($define!
@@ -235,12 +187,8 @@
   ($define!
     (append a b)
     ($if (null? a) b (pair (first a) (append (rest a) b))))
-  ; $letrec, not an inner $define!: the helper is recursive, and a $define!
-  ; in a body used to reach the global environment by an engine bug that
-  ; x-lang v0.12.0 fixed (a def scopes by its live frame now).  The body then
-  ; bound rev-helper where nothing could see it, and reverse answered
-  ; "Unbound SYMBOL 'rev-helper" -- $letrec is what this bundle already ships
-  ; for a binding that must see itself.
+  ; $letrec, not an inner $define!: the helper is recursive and must see
+  ; itself, which a body-local binding does not provide.
   ($define!
     (reverse lst)
     ($letrec
