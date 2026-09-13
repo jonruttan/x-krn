@@ -1,14 +1,12 @@
-; lang.xon -- what this bundle IS.
+; lang.xon -- what this bundle is.
 ;
-; xon: read with the ordinary reader and never evaluated, like every other
-; manifest in the x-lang world (pin.xon, engine.pin.xon).  A form a reader
-; does not know is a loud error, never a skip -- a manifest that silently
-; ignores half of itself cannot be extended without wondering which readers
-; obeyed which half.
+; xon: read with the ordinary reader and never evaluated, like every manifest
+; in the x-lang world (pin.xon, engine.pin.xon). An unknown form is a loud
+; error, never a silent skip.
 ;
 ; FORMAT (one form per line):
 ;   (lang "NAME")               the -l name
-;   (dialect NAME)              he | xe | rn -- a REQUIREMENT, not a taste
+;   (dialect NAME)              he | xe | rn -- a requirement
 ;   (requires-release "TAG")    the x-lang this bundle was built against
 ;   (requires-lang "NAME" ["V"]) another lang this one is written on top
 ;                               of, optionally at an exact version
@@ -16,23 +14,13 @@
 
 (lang "krn")
 
-; HELIUM, and this is derived rather than preferred.  Kernel's imports are
-; krn/base and krn/printer; neither reaches past x-core -- no float, no
-; socket, no file.  Declaring a heavier dialect would be a lie that costs
+; Helium: Kernel's imports are krn/base and krn/printer, and neither reaches
+; past x-core -- no float, no socket, no file. A heavier dialect would cost
 ; every user a numeric tower they never call.
 (dialect he)
 
-; PAIRING, NOT PINNING.  A digest freezes bytes; it says nothing about whether
-; those bytes still run against a platform that moved.  This row is the part
-; that is checkable, and it is compared for EQUALITY, never parsed -- the
-; platform's own rule for release strings.
-;
-; v0.6.0 was the first release carrying what this bundle needs: bundle
-; acquisition, `-l` loading, --share-dir, and eval! in the seam.  Everything
-; before it answers "Unknown option: --share-dir".  v0.7.0 is what this
-; bundle's specs are green against now, and the row tracks that rather than the
-; floor; running on anything else should be a decision someone made, not
-; something that happened.
+; The x-lang release this bundle is built and tested against; CI compares it
+; for equality. Running on any other release should be a deliberate choice.
 
 (requires-release "v0.13.0")
 

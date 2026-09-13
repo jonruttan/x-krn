@@ -17,25 +17,20 @@ Kernel 0.1.0
 (b c)
 ```
 
-x-krn is a **lang**: a different surface language loaded over an x-lang
-dialect. Where x-lang and Kernel spell something the same way, Kernel is free
-to mean something different by it: `(b c)` above is Kernel's own printer, not
-x-lang's `('b 'c)`. The terms are in x-lang's
+x-krn is a **lang**: a surface syntax loaded over an x-lang dialect, so a
+spelling shared with x-lang can mean something different here: `(b c)` above is
+Kernel's own printer, not x-lang's `('b 'c)`. The terms are in x-lang's
 [lang contract](https://github.com/jonruttan/x-lang/blob/main/docs/lang-contract.md).
 
 ## Status
 
-**Early.** 74 specs, all green against x-lang **v0.9.0**.
-
-That row is a *pairing*, not a floor. It records what this bundle was last
-built and tested against, not the oldest platform that would still run it —
-`lang.xon` carries the floor and the reasoning beside it. CI runs the declared
-release *and* `main`, so a platform that moves underneath this bundle shows up
-as a red build rather than a surprise years later.
+Early. 74 specs, all green against x-lang **v0.13.0**, the release `lang.xon`
+declares. CI runs the declared release and `main`, so a platform change that
+breaks this bundle shows up as a red build.
 
 ## Install
 
-Nothing cloned, from any directory:
+From any directory, nothing cloned:
 
 ```bash
 x --install-lang https://github.com/jonruttan/x-krn/releases/latest/download/lang.pin.xon
@@ -43,10 +38,10 @@ x -l krn
 ```
 
 x fetches the published pin, then the tarball it names, verifies the digest,
-and installs to `<share>/langs/krn` — where `x -l` looks. A failed upgrade
+and installs to `<share>/langs/krn`, where `x -l` looks. A failed upgrade
 leaves the working install untouched.
 
-From a clone, if you have one:
+From a clone:
 
 ```bash
 make install                      # into the x on your PATH
@@ -55,10 +50,9 @@ PREFIX=$HOME/.local make install  # or a particular prefix
 
 `make uninstall` removes it either way.
 
-**One trap, and it is the one you will hit.** `x` decides where to look for
-langs from the directory you run it *in*. Inside an **x-lang checkout** it
-searches `deps/langs/` and an installed lang is invisible, however correctly it
-was installed:
+`x` resolves langs relative to the directory it runs in. Inside an x-lang
+checkout it searches `deps/langs/` only, so an installed lang is not found
+there:
 
 ```
 $ cd path/to/x-lang && x -l krn
@@ -67,44 +61,40 @@ Error: no library, app or lang named 'krn'
       and deps/langs/*/lang.xon
 ```
 
-Run it from anywhere else, or name the bundles explicitly — `X_LANG_DIR` wins
-in both modes:
+Run `x` from another directory, or set `X_LANG_DIR`, which takes precedence in
+both cases:
 
 ```bash
 X_LANG_DIR=$HOME/.local/share/x/langs/ x -l krn   # the installed one
 X_LANG_DIR=/path/to/x-krn/.. x -l krn             # a checkout, uninstalled
 ```
 
+## Pin it for a project
 
-## Pin it instead, for a project
-
-An install is unversioned and machine-wide. When it matters *which* version a
-project builds against, pin it: `Pin bundle` fetches the release tarball and
+An install is unversioned and machine-wide. When a project must build against
+a specific version, pin it: `Pin bundle` fetches the release tarball and
 verifies it against a digest before unpacking. In the project's
 `lang.pin.xon`:
 
 ```x
 (lang "krn")
-(release "v0.1.2")
-(bundle "sha256:…" "https://github.com/jonruttan/x-krn/releases/download/v0.1.2/x-krn-v0.1.2.tar.gz")
+(release "v0.1.3")
+(bundle "sha256:…" "https://github.com/jonruttan/x-krn/releases/download/v0.1.3/x-krn-v0.1.3.tar.gz")
 (source "https://github.com/jonruttan/x-krn.git")
 ```
 
-Each release publishes its own digest, and the release notes carry this block
-ready to paste. Then:
+Each release's notes carry this block with its digest, ready to paste. Then:
 
 ```x-repl
 > (import x/tool/pin)
 > (Pin bundle "deps/langs")
-"deps/langs/krn-v0.1.2"
+"deps/langs/krn-v0.1.3"
 ```
 
-`deps/langs/` is where `x -l` looks in a checkout, beside the engine and
-anything else fetched rather than built. `X_LANG_DIR` overrides it.
+`deps/langs/` is where `x -l` looks in a checkout; `X_LANG_DIR` overrides it.
 
-**Which to use.** Install when you just want `x -l krn` to work. Pin when a
-build depends on it — the digest is what makes the version reproducible, and
-an install has none.
+Install when you just want `x -l krn` to work. Pin when a build depends on it:
+the digest is what makes the version reproducible.
 
 ## Running it
 
@@ -114,7 +104,7 @@ x -l krn -f program.krn  # batch
 ```
 
 x-lang boots the dialect `lang.xon` declares, arms this bundle's module root,
-and loads `run.x` on top — which is why nothing here needs to know a path.
+and loads `run.x` on top.
 
 ## The language
 
@@ -133,8 +123,8 @@ Kernel's core, on helium:
 ## Layout
 
 ```
-lang.xon               what this bundle is: name, dialect, release pairing
-run.x                  the entry
+lang.xon               name, dialect, and the x-lang release this pairs with
+run.x                  the entry point
 krn/base.x             the language
 krn/printer.x          Kernel's own result writer
 krn/constructs.x       construct declarations (formatter metadata)
@@ -145,36 +135,34 @@ tools/bundle.sh        rolls a release tarball and prints its pin
 Makefile               install / uninstall / test / bundle
 ```
 
-No file here carries a path literal, `run.x` included — the bundle relocates,
-and CI enforces it.
+No file here carries a path literal, `run.x` included, and CI enforces it.
 
 ## Development
 
-Run the specs against any x-lang checkout or install:
+Run the specs against an x-lang checkout or install:
 
 ```bash
 X=/path/to/x-lang/x.sh sh tests/spec-runner.sh
 ```
 
-**Pass `X` explicitly.** Without it the suite takes the `x` on your PATH, and an
+Pass `X` explicitly: without it the suite takes the `x` on your PATH, and an
 installed x that trails the checkout reports failures the platform has already
 fixed.
 
-**Do not `make install` into an x-lang checkout.** The Makefile asks
+Do not `make install` into an x-lang checkout. The Makefile asks
 `$(X) --share-dir` where to put the bundle, and a checkout answers with its own
-root — so the files land in `<checkout>/langs/krn`, which is not one of the
-three paths `-l` searches there. It reports success and the lang stays
-invisible. Install into a real `<share>` tree, or use `X_LANG_DIR`.
+root, so the files land in `<checkout>/langs/krn`, which `-l` does not search
+there. The install reports success and the lang is still not found. Install
+into a real `<share>` tree, or use `X_LANG_DIR`.
 
 Roll a release tarball locally, with the digest a consumer would pin:
 
 ```bash
-sh tools/bundle.sh v0.1.2
+sh tools/bundle.sh v0.1.3
 ```
 
 The tarball is byte-reproducible: it is built from the tag with `git archive`
-and a timestamp-free gzip, so two people rolling one tag get one digest.
-
+and a timestamp-free gzip, so the same tag always yields the same digest.
 Pushing a `v*` tag runs the suite and, only if it is green, publishes the
 tarball and its `.sha256` as a GitHub release.
 
@@ -183,12 +171,12 @@ tarball and its `.sha256` as a GitHub release.
 Kernel is John N. Shutt's language, worked out in his WPI dissertation and
 specified in the R-1RK report. Its claim is that the fexpr — Lisp's oldest and
 most disreputable idea, dropped from mainstream Lisps in the 1980s for being
-impossible to reason about — becomes sound once environments are first-class
-values. So the *operative* is the primitive: `$vau` receives its operands
-unevaluated together with its caller's environment, and ordinary applicative
-functions are derived from operatives by `wrap` rather than the other way
-around. Shutt died in 2021 with the design still unfinished; the R-1RK remains
-the reference, and this bundle implements a small core of it.
+hard to reason about — becomes sound once environments are first-class values.
+So the *operative* is the primitive: `$vau` receives its operands unevaluated
+together with its caller's environment, and ordinary applicative functions
+derive from operatives by `wrap` rather than the other way around. Shutt died
+in 2021 with the design still unfinished; the R-1RK remains the reference, and
+this bundle implements a small core of it.
 
 - [The Kernel Programming Language](https://web.cs.wpi.edu/~jshutt/kernel.html) — Shutt's page, with the reports
 - [R-1RK](https://ftp.cs.wpi.edu/pub/techreports/pdf/05-07.pdf) — the *Revised⁻¹ Report on the Kernel Programming Language*
