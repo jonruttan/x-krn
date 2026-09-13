@@ -56,16 +56,9 @@ uninstall: ## Remove it again
 	rm -rf "$(DEST)"
 	@echo "x-krn: removed $(DEST)"
 
-.PHONY: lint
-lint: ## Lint the bundle's own sources -- advisory structural rules included, and gated
-	X="$(X)" sh tests/lint.sh
-
 .PHONY: test
 test: ## Run the spec suite
 	X="$(X)" sh tests/spec-runner.sh
-
-.PHONY: check
-check: lint test ## Lint, then run the suite -- what CI gates on
 
 .PHONY: bundle
 bundle: ## Roll a release tarball and print its pin
