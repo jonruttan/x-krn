@@ -137,12 +137,13 @@ lang.xon               what this bundle is: name, dialect, release pairing
 run.x                  the entry
 krn/base.x             the language
 krn/printer.x          Kernel's own result writer
-krn/constructs.x       construct declarations (formatter metadata)
+krn/constructs.x       construct declarations (formatter and linter metadata)
 tests/spec-runner.sh   sources the platform's shared runner
+tests/lint.sh          shims onto the platform's lang-kit linter
 tests/gen-harness.sh   writes tests/lib/harness.gen.x (generated, never committed)
 tests/specs/*.spec.md  the suite
 tools/bundle.sh        rolls a release tarball and prints its pin
-Makefile               install / uninstall / test / bundle
+Makefile               install / uninstall / lint / test / check / bundle
 ```
 
 No file here carries a path literal, `run.x` included — the bundle relocates,
@@ -159,6 +160,20 @@ X=/path/to/x-lang/x.sh sh tests/spec-runner.sh
 **Pass `X` explicitly.** Without it the suite takes the `x` on your PATH, and an
 installed x that trails the checkout reports failures the platform has already
 fixed.
+
+Lint the bundle's own sources against the platform's linter, and run both:
+
+```bash
+make lint X=/path/to/x-lang/x.sh
+make check X=/path/to/x-lang/x.sh   # lint, then the suite
+```
+
+`tests/lint.sh` vendors nothing; it shims onto `tools/lang-kit/lint.sh` in
+whichever x it is given. **It skips itself on an x whose linter cannot read
+`krn/constructs.x`** — every release up to and including v0.14.0. Without that
+table nothing knows `$define!` binds a name, and every Kernel operative in
+`krn/base.x` reports undefined; the shim says so rather than failing. The gate
+arms itself, with no edit here, on the first x that carries the fix.
 
 **Do not `make install` into an x-lang checkout.** The Makefile asks
 `$(X) --share-dir` where to put the bundle, and a checkout answers with its own
