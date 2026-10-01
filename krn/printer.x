@@ -32,7 +32,7 @@
         (display v)
         (write v)))))
 
-; The %repl-print shape: nil is the "no value" result and prints nothing but
+; The %repl-print contract: nil is the "no value" result and prints nothing but
 ; the newline, matching lib/x/repl/loop.x.  Kernel's #inert IS nil, so this
 ; is also the right answer for ($define! x 1) at the prompt.
 (def %krn-repl-print
