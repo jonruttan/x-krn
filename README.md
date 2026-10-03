@@ -24,7 +24,7 @@ Kernel's own printer, not x-lang's `('b 'c)`. The terms are in x-lang's
 
 ## Status
 
-Early. 74 specs, all green against x-lang **v0.20.0**, the release `lang.xon`
+Early. 74 specs, all green against x-lang **v0.24.0**, the release `lang.xon`
 declares. CI runs the declared release and `main`, so a platform change that
 breaks this bundle shows up as a red build.
 
