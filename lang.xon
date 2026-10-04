@@ -22,6 +22,6 @@
 ; The x-lang release this bundle is built and tested against; CI compares it
 ; for equality. Running on any other release should be a deliberate choice.
 
-(requires-release "v0.24.0")
+(requires-release "v0.25.0")
 
 (entry "run.x")
