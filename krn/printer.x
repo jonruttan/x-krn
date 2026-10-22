@@ -5,7 +5,7 @@
 ; renders symbols bare and strings quoted -- (b c) and "hello" -- so this
 ; rebinds it, installed on %repl-print, which run.x sets.
 
-(provide krn/printer krn-write %krn-repl-print)
+(module krn/printer)
 
 ; Recursive descent, because only the SYMBOL leaf differs from `write`.
 ; Everything else -- strings, ints, chars, booleans, procedures -- delegates,
@@ -35,7 +35,9 @@
 ; The %repl-print contract: nil is the "no value" result and prints nothing but
 ; the newline, matching lib/x/repl/loop.x.  Kernel's #inert IS nil, so this
 ; is also the right answer for ($define! x 1) at the prompt.
-(def %krn-repl-print
+(def krn-repl-print
   (fn (_ result)
     (unless (null? result) (krn-write result))
     (newline)))
+
+(provide krn/printer krn-write krn-repl-print)

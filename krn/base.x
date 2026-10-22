@@ -17,8 +17,8 @@
 ; No path literals and no dialect boot here: run.x owns both.  This file
 ; loads on helium -- nothing below reaches past x-core.
 
+(module krn/base)
 (import krn/printer)
-(provide krn/base krn-version $vau $define! $lambda $let $letrec)
 
 (def krn-version "0.1.0")
 
@@ -109,8 +109,7 @@
         (pair (%krn-def-form (first body)) (self (rest body))))))
   ; --- $lambda: create applicative from operative ---
 
-  ($define!
-    $lambda
+  (def $lambda
     (op (formals . body)
       e
       (wrap
@@ -129,13 +128,11 @@
 
   ; --- Derived operative forms ---
 
-  ($define!
-    $when
+  (def $when
     (op (test . body)
       e
       ($if (eval test e) (eval (pair (lit $sequence) body)))))
-  ($define!
-    $unless
+  (def $unless
     (op (test . body)
       e
       ($if
@@ -143,8 +140,7 @@
         (eval (pair (lit $sequence) body)))))
   ; --- $let* ---
 
-  ($define!
-    $let*
+  (def $let*
     (op (bindings . body)
       e
       ($if
@@ -157,21 +153,7 @@
             (pair (lit $let*) (pair (rest bindings) body)))
           e))))
   ; --- Kernel-style predicates ---
-
-  ($define!
-    operative?
-    ($lambda
-      (x)
-      (and
-        (not (null? x))
-        (not (procedure? x))
-        (not (number? x))
-        (not (string? x))
-        (not (symbol? x))
-        (not (pair? x)))))
-  ($define! applicative? ($lambda (x) (procedure? x)))
-  ($define! boolean? ($lambda (x) (or (eq? x #t) (eq? x #f))))
-  ($define! inert? ($lambda (x) (null? x)))
+  ($define! applicative? ($lambda (x) (procedure? x)))  ($define! inert? ($lambda (x) (null? x)))
   ; --- List operations (as applicatives via $lambda) ---
 
   ; These are Kernel's own, not thin covers over the platform's: map, length,
@@ -181,16 +163,16 @@
   ; a lang that borrowed the platform's list vocabulary would be
   ; borrowing its argument conventions with it.
 
-  ($define!
-    (length lst)
-    ($if (null? lst) 0 (+ 1 (length (rest lst)))))
-  ($define!
-    (append a b)
-    ($if (null? a) b (pair (first a) (append (rest a) b))))
+  (def length
+    ($lambda (lst)
+    ($if (null? lst) 0 (+ 1 (length (rest lst))))))
+  (def append
+    ($lambda (a b)
+    ($if (null? a) b (pair (first a) (append (rest a) b)))))
   ; $letrec, not an inner $define!: the helper is recursive and must see
   ; itself, which a body-local binding does not provide.
-  ($define!
-    (reverse lst)
+  (def reverse
+    ($lambda (lst)
     ($letrec
       ((rev-helper
          ($lambda
@@ -199,65 +181,78 @@
              (null? l)
              acc
              (rev-helper (rest l) (pair (first l) acc))))))
-      (rev-helper lst ())))
-  ($define!
-    (list-ref lst n)
-    ($if (= n 0) (first lst) (list-ref (rest lst) (- n 1))))
-  ($define!
-    (map f lst)
+      (rev-helper lst ()))))
+  (def list-ref
+    ($lambda (lst n)
+    ($if (= n 0) (first lst) (list-ref (rest lst) (- n 1)))))
+  (def map
+    ($lambda (f lst)
     ($if
       (null? lst)
       ()
-      (pair (f (first lst)) (map f (rest lst)))))
-  ($define!
-    (filter pred lst)
+      (pair (f (first lst)) (map f (rest lst))))))
+  (def filter
+    ($lambda (pred lst)
     ($if
       (null? lst)
       ()
       ($if
         (pred (first lst))
         (pair (first lst) (filter pred (rest lst)))
-        (filter pred (rest lst)))))
-  ($define!
-    (for-each f lst)
+        (filter pred (rest lst))))))
+  (def for-each
+    ($lambda (f lst)
     ($if
       (null? lst)
       ()
-      ($sequence (f (first lst)) (for-each f (rest lst)))))
+      ($sequence (f (first lst)) (for-each f (rest lst))))))
   ; --- Composition accessors ---
 
-  ($define! (caar x) (first (first x)))
-  ($define! (cadr x) (first (rest x)))
-  ($define! (cdar x) (rest (first x)))
-  ($define! (cddr x) (rest (rest x)))
-  ($define! (caddr x) (first (rest (rest x))))
+  (def caar
+    ($lambda (x) (first (first x))))
+  (def cadr
+    ($lambda (x) (first (rest x))))
+  (def cdar
+    ($lambda (x) (rest (first x))))
+  (def cddr
+    ($lambda (x) (rest (rest x))))
+  (def caddr
+    ($lambda (x) (first (rest (rest x)))))
   ; --- Number operations ---
 
-  ($define! (zero? n) (= n 0))
-  ($define! (positive? n) (> n 0))
-  ($define! (negative? n) (< n 0))
-  ($define! (even? n) (= (% n 2) 0))
-  ($define! (odd? n) (not (= (% n 2) 0)))
-  ($define! (abs n) ($if (< n 0) (- 0 n) n))
-  ($define! (min a b) ($if (< a b) a b))
-  ($define! (max a b) ($if (> a b) a b))
+  (def zero?
+    ($lambda (n) (= n 0)))
+  (def positive?
+    ($lambda (n) (> n 0)))
+  (def negative?
+    ($lambda (n) (< n 0)))
+  (def even?
+    ($lambda (n) (= (% n 2) 0)))
+  (def odd?
+    ($lambda (n) (not (= (% n 2) 0))))
+  (def abs
+    ($lambda (n) ($if (< n 0) (- 0 n) n)))
+  (def min
+    ($lambda (a b) ($if (< a b) a b)))
+  (def max
+    ($lambda (a b) ($if (> a b) a b)))
   ; --- Member / Assoc ---
 
-  ($define!
-    (member x lst)
+  (def member
+    ($lambda (x lst)
     ($if
       (null? lst)
       #f
-      ($if (eq? x (first lst)) lst (member x (rest lst)))))
-  ($define!
-    (assoc key alist)
+      ($if (eq? x (first lst)) lst (member x (rest lst))))))
+  (def assoc
+    ($lambda (key alist)
     ($if
       (null? alist)
       #f
       ($if
         (eq? key (caar alist))
         (first alist)
-        (assoc key (rest alist)))))
+        (assoc key (rest alist))))))
   ; --- $letrec ---
 
   ; Mutual recursion within $let bindings.
@@ -268,8 +263,7 @@
 
   ; with $lambda's internal params (body, e, formals).
 
-  ($define!
-    $letrec
+  (def $letrec
     (op (lr-binds . lr-body)
       lr-e
       (eval
@@ -287,9 +281,60 @@
 
   ; Returns the caller's environment as a first-class value.
 
-  ($define! get-current-environment (op () e e))
+  (def get-current-environment (op () e e))
   ; --- make-environment ---
 
   ; Creates a fresh empty environment (an empty alist).
 
-  ($define! (make-environment) ()))
+  (def make-environment
+    ($lambda () ())))
+
+; Kernel's vocabulary is the root's: every name a Kernel program calls bare
+; is provided (global ...), and the module's own helpers stay its own.
+; operative? and boolean? are the platform's, which the library owns and a
+; Kernel program reads as it did.
+(provide krn/base krn-version
+  (global $vau)
+  (global cons)
+  (global car)
+  (global cdr)
+  (global quote)
+  (global $cond)
+  (global string?)
+  (global $define!)
+  (global $if)
+  (global $let)
+  (global $sequence)
+  (global #ignore)
+  (global #inert)
+  (global $lambda)
+  (global $when)
+  (global $unless)
+  (global $let*)
+  (global applicative?)
+  (global inert?)
+  (global length)
+  (global append)
+  (global reverse)
+  (global list-ref)
+  (global map)
+  (global filter)
+  (global for-each)
+  (global caar)
+  (global cadr)
+  (global cdar)
+  (global cddr)
+  (global caddr)
+  (global zero?)
+  (global positive?)
+  (global negative?)
+  (global even?)
+  (global odd?)
+  (global abs)
+  (global min)
+  (global max)
+  (global member)
+  (global assoc)
+  (global $letrec)
+  (global get-current-environment)
+  (global make-environment))

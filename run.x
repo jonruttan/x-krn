@@ -21,11 +21,12 @@
 ; lang.xon declares, arms this bundle's root with import-path!, cats this file,
 ; and appends the launcher when no -f was given, so `import krn/base` below
 ; resolves against the bundle wherever it sits.
-(import krn/base)
+(import krn/base krn-version)
+(import krn/printer krn-repl-print)
 
 (set! %lang-name "Kernel")
 (set! %lang-version krn-version)
 (set! %repl-prompt ">> ")
 ; Kernel prints Kernel results: (b c), not x's round-trippable ('b 'c).
 ; See krn/printer.x.
-(set! %repl-print %krn-repl-print)
+(set! %repl-print krn-repl-print)
