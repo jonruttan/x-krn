@@ -55,6 +55,7 @@ cat > "$OUT" <<EOF
 (def %install-root "$X_ROOT")
 (include "$X_BASE")
 (import-path! "$BUNDLE")
-(import krn/base)
-(set! %repl-print %krn-repl-print)
+(import krn/base krn-version)
+(import krn/printer krn-repl-print)
+(set! %repl-print krn-repl-print)
 EOF

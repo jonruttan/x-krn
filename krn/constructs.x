@@ -9,7 +9,7 @@
   ($if       (fmt . head-1)  (scope . none)       (branch . cond))
   ($let      (fmt . head-1)  (scope . let)        (branch . none))
   ($let*     (fmt . head-1)  (scope . let)        (branch . none))
-  ($letrec   (fmt . head-1)  (scope . let)        (branch . none))
+  ($letrec   (fmt . head-1)  (scope . letrec)     (branch . none))
   ($sequence (fmt . body)    (scope . none)       (branch . none))
   ($when     (fmt . head-1)  (scope . none)       (branch . cond))
   ($unless   (fmt . head-1)  (scope . none)       (branch . cond))
