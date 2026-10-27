@@ -46,25 +46,19 @@
   ; %krn-body-defs below rather than by evaluating an inner $define! at run
   ; time.
 
-  ; Top-level binding uses (base def-global), which takes def's global path
-  ; unconditionally and is frame-independent; where the engine lacks it
-  ; (prim-ref answers ()), the fallback is eval! of (def name (lit value)). The
-  ; (lit ...) wrap matters: eval! evaluates the def form it is handed, which
-  ; would evaluate the value a second time -- invisible for self-evaluating
-  ; values, but a symbol value would be looked up. See x-lang#527.
-  (def %dg-prim (prim-ref (lit base) (lit def-global)))
-  (def %krn-def-global
-    (if (null? %dg-prim)
-      (fn (_ n v) (eval! (list (lit def) n (list (lit lit) v))))
-      (fn (_ n v) (%dg-prim n v))))
+  ; A top-level binding is a def evaluated in the root: eval! evaluates there
+  ; whatever the frame depth (engine law 10). The (lit ...) wrap keeps def
+  ; from evaluating the value a second time -- a symbol value would be looked
+  ; up.
+  (def %krn-def-root (fn (_ n v) (eval! (list (lit def) n (list (lit lit) v)))))
   (def $define!
     (op (name-or-form . body)
       e
       (if (pair? name-or-form)
-        (%krn-def-global
+        (%krn-def-root
           (first name-or-form)
           (eval (pair (lit $lambda) (pair (rest name-or-form) body)) e))
-        (%krn-def-global name-or-form (eval (first body) e)))))
+        (%krn-def-root name-or-form (eval (first body) e)))))
   ; --- Core aliases ---
 
   (def $if if)
