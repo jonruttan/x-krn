@@ -129,6 +129,8 @@ krn/base.x             the language
 krn/printer.x          Kernel's own result writer
 krn/constructs.x       construct declarations (formatter metadata)
 tests/spec-runner.sh   sources the platform's shared runner
+tests/spec-gate.sh     sources the platform's gate, which CI runs
+tests/contract/        the recorded debt CI gates on -- empty, and saying so
 tests/gen-harness.sh   writes tests/lib/harness.gen.x (generated, never committed)
 tests/specs/*.spec.md  the suite
 tools/bundle.sh        rolls a release tarball and prints its pin
