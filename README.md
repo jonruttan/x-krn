@@ -15,7 +15,13 @@ Kernel 0.1.0
 81
 >> (member 'b '(a b c))
 (b c)
+>> ($define! my-op ($vau (x) e (+ 1 (eval x e))))
+>> (my-op (+ 2 3))
+6
 ```
+
+`my-op` is an operative: it receives `(+ 2 3)` unevaluated, with its
+caller's environment as `e`, and evaluates it there itself.
 
 x-krn is a **lang**: a surface syntax loaded over an x-lang dialect, so a
 spelling shared with x-lang can mean something different here: `(b c)` above is
@@ -27,6 +33,12 @@ Kernel's own printer, not x-lang's `('b 'c)`. The terms are in x-lang's
 Early. 74 specs, all green against x-lang **v0.44.0**, the release `lang.xon`
 declares. CI runs the declared release and `main`, so a platform change that
 breaks this bundle shows up as a red build.
+
+It is a small core of Kernel, the names under [The language](#the-language),
+and not the whole of the report.
+
+This README describes `main`. `releases/latest` installs v0.1.3, which is
+older and pairs with an earlier x-lang release.
 
 ## Install
 
@@ -112,10 +124,12 @@ Kernel's core, on helium:
 
 | | |
 |---|---|
-| operatives | `$vau`, `$define!`, `$lambda`, `$let`, `$letrec`, `$if`, `$cond`, `$sequence` |
+| operatives | `$vau`, `$define!`, `$lambda`, `$let`, `$let*`, `$letrec`, `$if`, `$cond`, `$when`, `$unless`, `$sequence` |
 | environments | `get-current-environment`, `make-environment` |
-| predicates | `applicative?`, `operative?`, `boolean?`, `inert?`, `null?`, `pair?`, `symbol?` |
-| lists | `cons`/`car`/`cdr`, `list`, `append`, `map`, `member`, `length`, `reverse` |
+| constants | `#inert`, `#ignore` |
+| predicates | `applicative?`, `operative?`, `boolean?`, `inert?`, `null?`, `pair?`, `symbol?`, `string?` |
+| lists | `cons`/`car`/`cdr` and `caar` to `caddr`, `list`, `append`, `map`, `filter`, `for-each`, `member`, `assoc`, `length`, `list-ref`, `reverse` |
+| numbers | `zero?`, `positive?`, `negative?`, `even?`, `odd?`, `abs`, `min`, `max` |
 
 `$define!` binds in its caller's environment; internal definitions in a
 `$lambda` body bind locally, rewritten at construction time.
@@ -144,7 +158,7 @@ No file here carries a path literal, `run.x` included, and CI enforces it.
 Run the specs against an x-lang checkout or install:
 
 ```bash
-X=/path/to/x-lang/x.sh sh tests/spec-runner.sh
+X=/path/to/x-lang/x.sh make test
 ```
 
 Pass `X` explicitly: without it the suite takes the `x` on your PATH, and an
@@ -166,7 +180,7 @@ sh tools/bundle.sh v0.1.3
 The tarball is byte-reproducible: it is built from the tag with `git archive`
 and a timestamp-free gzip, so the same tag always yields the same digest.
 Pushing a `v*` tag runs the suite and, only if it is green, publishes the
-tarball and its `.sha256` as a GitHub release.
+tarball, its `.sha256` and `lang.pin.xon` as a GitHub release.
 
 ## Background
 
