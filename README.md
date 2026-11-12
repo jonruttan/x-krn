@@ -37,9 +37,6 @@ breaks this bundle shows up as a red build.
 It is a small core of Kernel, the names under [The language](#the-language),
 and not the whole of the report.
 
-This README describes `main`. `releases/latest` installs v0.1.3, which is
-older and pairs with an earlier x-lang release.
-
 ## Install
 
 From any directory, nothing cloned:
@@ -90,8 +87,8 @@ verifies it against a digest before unpacking. In the project's
 
 ```x
 (lang "krn")
-(release "v0.1.3")
-(bundle "sha256:…" "https://github.com/jonruttan/x-krn/releases/download/v0.1.3/x-krn-v0.1.3.tar.gz")
+(release "v0.1.4")
+(bundle "sha256:…" "https://github.com/jonruttan/x-krn/releases/download/v0.1.4/x-krn-v0.1.4.tar.gz")
 (source "https://github.com/jonruttan/x-krn.git")
 ```
 
@@ -100,7 +97,7 @@ Each release's notes carry this block with its digest, ready to paste. Then:
 ```x-repl
 > (import x/tool/pin)
 > (Pin bundle "deps/langs")
-"deps/langs/krn-v0.1.3"
+"deps/langs/krn-v0.1.4"
 ```
 
 `deps/langs/` is where `x -l` looks in a checkout; `X_LANG_DIR` overrides it.
@@ -174,7 +171,7 @@ into a real `<share>` tree, or use `X_LANG_DIR`.
 Roll a release tarball locally, with the digest a consumer would pin:
 
 ```bash
-sh tools/bundle.sh v0.1.3
+sh tools/bundle.sh v0.1.4
 ```
 
 The tarball is byte-reproducible: it is built from the tag with `git archive`
